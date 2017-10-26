@@ -47,19 +47,19 @@ class TestAEP(common.TransactionCase):
             'name': 'Sale journal',
             'code': 'VEN',
             'type': 'sale'})
-        # create move in december last year
+        # create move in December last year
         self._create_move(
             date=datetime.date(self.prev_year, 12, 1),
             amount=100,
             debit_acc=self.account_ar,
             credit_acc=self.account_in)
-        # create move in january this year
+        # create move in January this year
         self._create_move(
             date=datetime.date(self.curr_year, 1, 1),
             amount=300,
             debit_acc=self.account_ar,
             credit_acc=self.account_in)
-        # create move in february this year
+        # create move in March this year
         self._create_move(
             date=datetime.date(self.curr_year, 3, 1),
             amount=500,
@@ -81,6 +81,13 @@ class TestAEP(common.TransactionCase):
         self.aep.parse_expr("crdp[700I%]")
         self.aep.parse_expr("bali[400%]")
         self.aep.parse_expr("bale[700%]")
+        self.aep.parse_expr(
+            "balp[]"
+            "[('account_id.code', '=', '400AR')]")
+        self.aep.parse_expr(
+            "balp[]"
+            "[('account_id.user_type_id', '=', "
+            "  ref('account.data_account_type_receivable').id)]")
         self.aep.parse_expr("bal_700IN")  # deprecated
         self.aep.parse_expr("bals[700IN]")  # deprecated
         self.aep.done_parsing()
@@ -133,6 +140,12 @@ class TestAEP(common.TransactionCase):
         self.assertIs(self._eval('bali[700IN]'), AccountingNone)
         # check variation
         self.assertEquals(self._eval('balp[400AR]'), 100)
+        self.assertEquals(self._eval(
+            "balp[][('account_id.code', '=', '400AR')]"), 100)
+        self.assertEquals(self._eval(
+            "balp[]"
+            "[('account_id.user_type_id', '=', "
+            "  ref('account.data_account_type_receivable').id)]"), 100)
         self.assertEquals(self._eval('balp[700IN]'), -100)
         # check ending balance
         self.assertEquals(self._eval('bale[400AR]'), 100)
