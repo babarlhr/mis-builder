@@ -3,8 +3,9 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
 import datetime
-from dateutil.relativedelta import relativedelta
 import logging
+
+from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
@@ -141,7 +142,7 @@ class MisReportInstancePeriod(models.Model):
                      '|',
                      ('company_id', '=', False),
                      ('company_id', 'in',
-                      record.report_instance_id.company_ids.ids)])
+                      record.report_instance_id.query_company_ids.ids)])
                 if current_periods:
                     # TODO we take the first date range we found as current
                     #      this may be surprising if several companies
@@ -235,9 +236,10 @@ class MisReportInstancePeriod(models.Model):
         domain=[('field_id.name', '=', 'debit'),
                 ('field_id.name', '=', 'credit'),
                 ('field_id.name', '=', 'account_id'),
-                ('field_id.name', '=', 'date')],
+                ('field_id.name', '=', 'date'),
+                ('field_id.name', '=', 'company_id')],
         help="A 'move line like' model, ie having at least debit, credit, "
-             "date and account_id fields.",
+             "date, account_id and company_id fields.",
     )
     source_sumcol_ids = fields.One2many(
         comodel_name='mis.report.instance.period.sum',
@@ -401,7 +403,7 @@ class MisReportInstance(models.Model):
         required=True,
     )
     multi_company = fields.Boolean(
-        string='Multiple',
+        string='Multiple companies',
         help="Check if you wish to specify "
              "children companies to be searched for data.",
         default=False,
@@ -410,7 +412,11 @@ class MisReportInstance(models.Model):
         comodel_name='res.company',
         string='Companies',
         help="Select companies for which data will be searched.",
-        required=True,
+    )
+    query_company_ids = fields.Many2many(
+        comodel_name='res.company',
+        compute='_compute_query_company_ids',
+        help="Companies for which data will be searched.",
     )
     currency_id = fields.Many2one(
         comodel_name='res.currency',
@@ -440,7 +446,16 @@ class MisReportInstance(models.Model):
                 ('id', 'child_of', self.company_id.id),
             ])
         else:
-            self.company_ids = self.company_id
+            self.company_ids = False
+
+    @api.multi
+    @api.depends('multi_company', 'company_id', 'company_ids')
+    def _compute_query_company_ids(self):
+        for rec in self:
+            if rec.multi_company:
+                rec.query_company_ids = rec.company_ids or rec.company_id
+            else:
+                rec.query_company_ids = rec.company_id
 
     @api.multi
     def save_report(self):
@@ -654,7 +669,7 @@ class MisReportInstance(models.Model):
         """
         self.ensure_one()
         aep = self.report_id._prepare_aep(
-            self.company_ids or self.company_id, self.currency_id)
+            self.query_company_ids, self.currency_id)
         kpi_matrix = self.report_id.prepare_kpi_matrix()
         for period in self.period_ids:
             description = None
@@ -685,7 +700,7 @@ class MisReportInstance(models.Model):
         account_id = arg.get('account_id')
         if period_id and expr and AEP.has_account_var(expr):
             period = self.env['mis.report.instance.period'].browse(period_id)
-            aep = AEP(self.company_ids or self.company_id, self.currency_id)
+            aep = AEP(self.query_company_ids, self.currency_id)
             aep.parse_expr(expr)
             aep.done_parsing()
             domain = aep.get_aml_domain_for_expr(
