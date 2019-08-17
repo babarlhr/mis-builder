@@ -1,3 +1,7 @@
+[build-system]
+requires = [ "/home/sbi-local/ACSONE/OpenErp/setuptools-odoo", "/home/sbi-local/ACSONE/OpenErp/wodoo"]
+build-backend = "wodoo.buildapi"
+
 [tool.towncrier]
     template = "../.towncrier-template.rst"
     underlines = ['~']
