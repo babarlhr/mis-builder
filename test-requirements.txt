@@ -1,0 +1,1 @@
+odoo14-addon-report_xlsx @ git+https://github.com/OCA/reporting-engine@refs/pull/441/head#subdirectory=setup/report_xlsx
