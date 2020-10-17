@@ -4,9 +4,6 @@ cache:
     - $HOME/.cache/pip
     - $HOME/.cache/pre-commit
 
-python:
-  - "3.6"
-
 addons:
   postgresql: "9.6"
   apt:
@@ -26,9 +23,11 @@ jobs:
       after_success:
       before_install:
     - stage: test
+      python: 3.6
       env:
         - TESTS=1 ODOO_REPO="odoo/odoo" MAKEPOT="1"
     - stage: test
+      python: 3.8
       env:
         - TESTS=1 ODOO_REPO="OCA/OCB"
 env:
