@@ -52,3 +52,4 @@ jobs:
            click-odoo-makepot -d odoo --msgmerge-if-new-pot --commit
            # TODO git push
       # TODO: support addon include/exclude mechanism
+      # TODO: OCB
