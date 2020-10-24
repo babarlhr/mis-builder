@@ -4,7 +4,7 @@ on: [pull_request, push]
 
 jobs:
   test:
-    runs-on: ubuntu-latest # TODO pin ubuntu version
+    runs-on: ubuntu-latest
     container: quay.io/sbidoul/oca-ci:py36-odoo13
     services:
       postgres:
