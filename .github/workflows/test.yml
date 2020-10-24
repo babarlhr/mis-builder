@@ -21,7 +21,7 @@ jobs:
           --health-retries 5
     env:
       ODOO_VERSION: "13.0"
-      PGHOST: 127.0.0.1
+      PGHOST: postgres
       PGUSER: odoo
       PGPASSWORD: odoo
     steps:
