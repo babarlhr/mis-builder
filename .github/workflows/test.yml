@@ -63,10 +63,10 @@ jobs:
           acsoo-venv/bin/pip install acsoo
       - name: Prepare test database
         run: |
-          odoo-venv/bin/odoo -i $(acsoo-venv/bin/acsoo addons list-depends) --stop-after-init
+          odoo-venv/bin/odoo -d odoo -i $(acsoo-venv/bin/acsoo addons list-depends) --stop-after-init
       - name: Run tests
         run: |
-          odoo-venv/bin/odoo -i $(acsoo-venv/bin/acsoo addons list) --test-enable --stop-after-init
+          odoo-venv/bin/odoo -d odoo -i $(acsoo-venv/bin/acsoo addons list) --test-enable --stop-after-init
       # TODO: codecov
       # TODO: run click-odoo-makepot and push back to git repo if test success
       # TODO: support addon include/exclude mechanism
