@@ -43,8 +43,8 @@ jobs:
           python3 -m venv odoo-venv
           export PIP_USE_FEATURE=2020-resolver
           odoo-venv/bin/pip install -U pip wheel setuptools
-          git clone https://github.com/odoo/odoo --depth=1 --branch=${ODOO_VERSION}
-          odoo-venv/bin/pip install -r odoo/requirements.txt -e odoo -f https://wheelhouse.acsone.eu/manylinux1
+          git clone --depth=1 --branch=${ODOO_VERSION} https://github.com/odoo/odoo odoo-src
+          odoo-venv/bin/pip install -r odoo-src/requirements.txt -e odoo-src -f https://wheelhouse.acsone.eu/manylinux1
           # websocket-client is needed for tour tests to not be skipped
           pip install -U websocket-client
       - name: Install acsoo (to get acsoo addons list and acsoo checklog commands)
