@@ -44,7 +44,11 @@ jobs:
       - name: Prepare test database
         run: odoo -d odoo -i $(addons list-depends) --stop-after-init
       - name: Run tests
-        run: odoo -d odoo -i $(addons list) --test-enable --stop-after-init
-      # TODO: codecov
-      # TODO: run click-odoo-makepot and push back to git repo if test success
+        run: coverage run odoo -d odoo -i $(addons list) --test-enable --stop-after-init
+      - uses: codecov/codecov-action@v1
+      - name: Export translations (.pot)
+        run: |
+           pip install click-odoo-contrib
+           click-odoo-makepot -d odoo --msgmerge-if-new-pot --commit
+           # TODO git push
       # TODO: support addon include/exclude mechanism
