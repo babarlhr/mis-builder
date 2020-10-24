@@ -54,9 +54,7 @@ jobs:
           export PIP_USE_FEATURE=2020-resolver
           acsoo-venv/bin/pip install -U pip wheel setuptools
           acsoo-venv/bin/pip install acsoo
-          echo "#!/bin/bash\nacsoo addons \$@" > ./addons
-          chmod +x addons
-          cat ./addons
+          alias addons="acsoo addons"
       - name: Install Addons and their dependencies
         run: |
           set -exo pipefail
