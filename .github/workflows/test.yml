@@ -35,8 +35,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Install Odoo
-        # TODO: run in the Odoo docker image with odoo and acsoo preinstalled?
-        #       this could speedup install and avoid dependency
+        # TODO: run in an oca-ci container image with odoo preinstalled?
+        #       this will speedup install and avoid dependency
         #       on https://wheelhouse.acsone.eu/manylinux1
         run: |
           set -exo pipefail
@@ -48,6 +48,9 @@ jobs:
           # websocket-client is needed for tour tests to not be skipped
           pip install -U websocket-client
       - name: Install acsoo (to get acsoo addons list and acsoo checklog commands)
+        # TODO: move acsoo addons list to OCA-managed standalone project
+        # TODO: move acsoo checklog to OCA-managed standalone project
+        # TODO: install this in oca-ci container image (see above)
         run: |
           set -exo pipefail
           python3 -m venv acsoo-venv
@@ -73,11 +76,9 @@ jobs:
       - name: Run tests
         run: |
           set -exo pipefail
-          odoo-venv/bin/odoo -d odoo -i $(acsoo-venv/bin/acsoo addons list) --test-enable --stop-after-init | acsoo-venv/bin/acsoo checklog
+          odoo-venv/bin/odoo -d odoo -i $(acsoo-venv/bin/acsoo addons list) --test-enable --stop-after-init 2>&1 | acsoo-venv/bin/acsoo checklog
       # TODO: codecov
       # TODO: run click-odoo-makepot and push back to git repo if test success
       # TODO: support addon include/exclude mechanism
       # TODO: install wkhtmltopdf
       # TODO: install apt packages?
-      # TODO: remove dependency on acsoo addons list
-      # TODO: remove dependency on acsoo checklog
