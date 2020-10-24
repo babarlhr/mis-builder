@@ -55,6 +55,7 @@ jobs:
           acsoo-venv/bin/pip install -U pip wheel setuptools
           acsoo-venv/bin/pip install acsoo
           alias addons="acsoo-venv/bin/acsoo addons"
+          alias checklog="acsoo checklog"
       - name: Install Addons and their dependencies
         run: |
           set -exo pipefail
@@ -70,11 +71,11 @@ jobs:
       - name: Prepare test database
         run: |
           set -exo pipefail
-          odoo-venv/bin/odoo -d odoo -i $(./addons list-depends) --stop-after-init
+          odoo-venv/bin/odoo -d odoo -i $(addons list-depends) --stop-after-init
       - name: Run tests
         run: |
           set -exo pipefail
-          odoo-venv/bin/odoo -d odoo -i $(./addons list) --test-enable --stop-after-init
+          odoo-venv/bin/odoo -d odoo -i $(addons list) --test-enable --stop-after-init | checklog
       # TODO: codecov
       # TODO: run click-odoo-makepot and push back to git repo if test success
       # TODO: support addon include/exclude mechanism
