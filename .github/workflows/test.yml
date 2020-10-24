@@ -55,5 +55,3 @@ jobs:
       # TODO: codecov
       # TODO: run click-odoo-makepot and push back to git repo if test success
       # TODO: support addon include/exclude mechanism
-      # TODO: install wkhtmltopdf
-      # TODO: install apt packages?
