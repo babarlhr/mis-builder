@@ -9,8 +9,8 @@ jobs:
       postgres:
         image: postgres:9.6
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
           POSTGRES_DB: odoo
         ports:
           - 5432:5432
@@ -21,8 +21,8 @@ jobs:
     env:
       ODOO_VERSION: "13.0"
       PGHOST: 127.0.0.1
-      PGUSER: postgres
-      PGPASSWORD: postgres
+      PGUSER: odoo
+      PGPASSWORD: odoo
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-python@v1
@@ -35,11 +35,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Install Odoo
-        # TODO: run in the Odoo docker image?
+        # TODO: run in the Odoo docker image with odoo and acsoo preinstalled?
         #       this could speedup install and avoid dependency
         #       on https://wheelhouse.acsone.eu/manylinux1
         run: |
-          set -ex
+          set -exo pipefail
           python3 -m venv odoo-venv
           export PIP_USE_FEATURE=2020-resolver
           odoo-venv/bin/pip install -U pip wheel setuptools
@@ -47,8 +47,19 @@ jobs:
           odoo-venv/bin/pip install -r odoo/requirements.txt -e odoo -f https://wheelhouse.acsone.eu/manylinux1
           # websocket-client is needed for tour tests to not be skipped
           pip install -U websocket-client
+      - name: Install acsoo (to get acsoo addons list and acsoo checklog commands)
+        run: |
+          set -exo pipefail
+          python3 -m venv acsoo-venv
+          export PIP_USE_FEATURE=2020-resolver
+          acsoo-venv/bin/pip install -U pip wheel setuptools
+          acsoo-venv/bin/pip install acsoo
+          echo "#!/bin/bash\nacsoo addons \$@" > ./addons
+          chmod +x addons
+          cat ./addons
       - name: Install Addons and their dependencies
         run: |
+          set -exo pipefail
           SHORT_ODOO_VERSION=$(echo $ODOO_VERSION | cut -d '.' -f 1)
           touch test-requirements.txt
           for addon in $(ls setup/ -I README -I _metapackage) ; do
@@ -58,18 +69,14 @@ jobs:
           # use OCA wheelhouse because it is slightly fresher than PyPI
           odoo-venv/bin/pip install --pre -r test-requirements.txt \
             --extra-index-url https://wheelhouse.odoo-community.org/oca-simple/
-      - name: Install acsoo (to get acsoo addons list and acsoo checklog commands)
-        run: |
-          python3 -m venv acsoo-venv
-          export PIP_USE_FEATURE=2020-resolver
-          acsoo-venv/bin/pip install -U pip wheel setuptools
-          acsoo-venv/bin/pip install acsoo
       - name: Prepare test database
         run: |
-          odoo-venv/bin/odoo -d odoo -i $(acsoo-venv/bin/acsoo addons list-depends) --stop-after-init
+          set -exo pipefail
+          odoo-venv/bin/odoo -d odoo -i $(./addons list-depends) --stop-after-init
       - name: Run tests
         run: |
-          odoo-venv/bin/odoo -d odoo -i $(acsoo-venv/bin/acsoo addons list) --test-enable --stop-after-init
+          set -exo pipefail
+          odoo-venv/bin/odoo -d odoo -i $(./addons list) --test-enable --stop-after-init
       # TODO: codecov
       # TODO: run click-odoo-makepot and push back to git repo if test success
       # TODO: support addon include/exclude mechanism
