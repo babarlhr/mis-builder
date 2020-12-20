@@ -1,11 +1,11 @@
 name: test Odoo
 
-on: [pull_request, push]
+on: [pull_request]
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: quay.io/sbidoul/oca-ci:py36-odoo13
+    container: ghcr.io/sbidoul/oca-ci/py3.6-odoo13.0:latest
     services:
       postgres:
         image: postgres:9.6
@@ -19,10 +19,6 @@ jobs:
         options:
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
-    env:
-      PGHOST: postgres
-      PGUSER: odoo
-      PGPASSWORD: odoo
     steps:
       - uses: actions/checkout@v1
       - uses: actions/cache@v2
