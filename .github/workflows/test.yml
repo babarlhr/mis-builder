@@ -21,16 +21,6 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('~/.cache/pip/**') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      - name: Set pip cache permissions
-        run: |
-          mkdir -p ~/.cache/pip/
-          chown -R $(id -u):$(id -g) ~/.cache/pip/
       - name: Install Addons and their dependencies
         run: oca_install_addons
       - name: Prepare test database
