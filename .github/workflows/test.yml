@@ -28,7 +28,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       - name: Set pip cache permissions
-        run: chown -R $(id -u):$(id -g) ~/.cache/pip/
+        run: |
+          mkdir -p ~/.cache/pip/
+          chown -R $(id -u):$(id -g) ~/.cache/pip/
       - name: Install Addons and their dependencies
         run: oca_install_addons
       - name: Prepare test database
