@@ -27,7 +27,7 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('~/.cache/pip/**') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-        # attempt to set correct permissions for pip cache
+      - name: Set pip cache permissions
         run: chown -R $(id -u):$(id -g) ~/.cache/pip/
       - name: Install Addons and their dependencies
         run: oca_install_addons
