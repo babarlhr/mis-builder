@@ -21,16 +21,13 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v1
-      - name: Install Addons and their dependencies
-        run: oca_install_addons
-      - name: Prepare test database
-        run: oca_init_test_database
-      - name: Run tests
-        run: oca_run_tests
+      - run: oca_install_addons
+      - run: oca_init_test_database
+      - run: oca_run_tests
       - uses: codecov/codecov-action@v1
       - name: Export translations (.pot)
         run: |
           pip install click-odoo-contrib
           click-odoo-makepot -d odoo --msgmerge-if-new-pot --commit
-          # TODO git push
+          # TODO git push, only on main branch
       # TODO: OCB
